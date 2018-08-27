@@ -86,6 +86,7 @@ var (
 
 	concurrencyQuantumOfTime = flag.Duration("concurrencyQuantumOfTime", 100*time.Millisecond, "")
 	concurrencyModel         = flag.String("concurrencyModel", string(v1alpha1.RevisionRequestConcurrencyModelMulti), "")
+	targetAddr				 = flag.String("targetAddr", "http://localhost:8080", "Address for the proxy target.")
 	singleConcurrencyBreaker = queue.NewBreaker(singleConcurrencyQueueDepth, 1)
 )
 
@@ -276,9 +277,9 @@ func main() {
 		zap.String(logkey.Key, servingRevisionKey),
 		zap.String(logkey.Pod, podName))
 
-	target, err := url.Parse("http://localhost:8080")
+	target, err := url.Parse(*targetAddr)
 	if err != nil {
-		logger.Fatal("Failed to parse localhost url", zap.Error(err))
+		logger.Fatalf("Failed to parse target url: %s, error: %v", *targetAddr, zap.Error(err))
 	}
 
 	httpProxy = httputil.NewSingleHostReverseProxy(target)
